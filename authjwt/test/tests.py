@@ -6,20 +6,21 @@ from ..serializers import CadasterSerializer, LoginSerializer, VerifyEmailSerial
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 from ..models import EmailVerification
+from ..services import hash_code
 from unittest.mock import patch
 
 @pytest.mark.django_db
 @patch("authjwt.serializers.create_user_with_verification")
 def teste_cadaster_serializer_create(mock_create):
     user_fake = User(username='gabruel', email='gsr@gmail.com')
-    user_fake.set_password("banana")
+    user_fake.set_password("BananaForte!2026")
 
     mock_create.return_value = user_fake
 
     data = {
         'username': 'gabruel',
         'email': 'gsr@gmail.com',
-        'password': 'banana'
+        'password': 'BananaForte!2026'
     }
 
     serializer = CadasterSerializer(data=data)
@@ -29,7 +30,7 @@ def teste_cadaster_serializer_create(mock_create):
 
     assert user.username == 'gabruel'
     assert user.email == 'gsr@gmail.com'
-    assert user.check_password("banana")
+    assert user.check_password("BananaForte!2026")
 
     mock_create.assert_called_once()
 
@@ -44,13 +45,13 @@ def teste_verify_email():
 
     verification = EmailVerification.objects.create(
         user=user,
-        code='1234',
+        code=hash_code('123456'),
         is_verified=False
     )
 
     data = {
         'email': 'gsr@gmail.com',
-        'code': '1234'
+        'code': '123456'
     }
 
     serializer = VerifyEmailSerializer(data=data)
@@ -77,13 +78,13 @@ def test_verify_email_wrong_code():
 
     EmailVerification.objects.create(
         user=user,
-        code="1234",
+        code=hash_code("123456"),
         is_verified=False
     )
 
     data = {
         "email": "luiz@email.com",
-        "code": "9999"
+        "code": "999999"
     }
 
     serializer = VerifyEmailSerializer(data=data)

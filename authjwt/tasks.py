@@ -7,8 +7,8 @@ from django.conf import settings
 def email_verificacao(username, email, code):
     send_mail(
         subject="Código de verificação - TechBird",
-        message=f"Olá {username},\n\nSeu código é: {code}",
-        from_email=settings.EMAIL_HOST_USER,
+        message=f"Olá {username},\n\nSeu código é: {code}\n\nEle expira em {settings.VERIFICATION_CODE_MINUTES} minutos.",
+        from_email=settings.DEFAULT_FROM_EMAIL,
         recipient_list=[email],
         fail_silently=False,
     )
@@ -16,9 +16,8 @@ def email_verificacao(username, email, code):
 @shared_task
 def email_boas_vindas(username, email):
     subject       = 'Bem-Vindo!!'
-    from_email    = settings.EMAIL_HOST_USER
+    from_email    = settings.DEFAULT_FROM_EMAIL
     to            = [email]
-    fail_silently = False
     text_content  = f"""
 Olá {username},
 
@@ -29,7 +28,7 @@ Agora você já pode acessar a plataforma e aproveitar todos os recursos.
 Se precisar de ajuda, estamos à disposição.
 
 Equipe TechBird 🚀
-""",
+"""
     html_content   = f"""
         <html>
             <body style="font-family: Arial, sans-serif;">
@@ -45,18 +44,6 @@ Equipe TechBird 🚀
                     a melhor experiência possível para que você possa ter uma experiência agradável.
                 </p>
 
-                <a href="https://github.com/gabruel12"
-                   style="
-                       background-color:#2E86C1;
-                       color:white;
-                       padding:10px 20px;
-                       text-decoration:none;
-                       border-radius:5px;
-                       display:inline-block;
-                   ">
-                   Acessar minha conta
-                </a>
-
                 <p style="margin-top:20px;">
                     Se tiver qualquer dúvida, basta responder este email.
                 </p>
@@ -67,9 +54,8 @@ Equipe TechBird 🚀
                 </p>
             </body>
         </html>
-""",
+"""
     
     msg = EmailMultiAlternatives(subject, text_content, from_email, to)
     msg.attach_alternative(html_content, "text/html")
     msg.send()
-    

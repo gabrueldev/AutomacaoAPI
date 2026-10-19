@@ -3,3 +3,6 @@ __pycache__
 *.ctl
 *.sock
 staticfiles
+.venv/
+.pytest_cache/
+*.sqlite3
