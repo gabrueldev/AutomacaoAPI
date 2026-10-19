@@ -1,4 +1,3 @@
-
 from .serializers import CadasterSerializer, LoginSerializer, VerifyEmailSerializer, ResendCodeSerializer, UserSerializer
 from .services import send_new_code
 from rest_framework.views import APIView
@@ -20,6 +19,8 @@ class VerifyEmailView(APIView):
 
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
+SAME_ANSWER_FOR_ANY_EMAIL = {"detail": "Se o email estiver pendente, um novo código foi enviado."}
+
 class ResendCodeView(APIView):
     permission_classes = [AllowAny]
 
@@ -31,8 +32,7 @@ class ResendCodeView(APIView):
         if user:
             send_new_code(user)
 
-        # Mesma resposta sempre, para não revelar quais emails estão cadastrados
-        return Response({"detail": "Se o email estiver pendente, um novo código foi enviado."})
+        return Response(SAME_ANSWER_FOR_ANY_EMAIL)
 
 class CadasterView(APIView):
     permission_classes = [AllowAny]
@@ -50,10 +50,10 @@ class CadasterView(APIView):
 class LoginView(TokenObtainPairView):
     serializer_class = LoginSerializer
 
-# A conta é sempre a do usuário logado, então ninguém mexe na conta de outro
 class MeView(RetrieveUpdateDestroyAPIView):
     serializer_class   = UserSerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):
-        return self.request.user
+        only_the_logged_in_user_account = self.request.user
+        return only_the_logged_in_user_account

@@ -1,4 +1,3 @@
-
 import re
 import pytest
 from datetime import timedelta
@@ -35,7 +34,7 @@ def test_cadastro_envia_codigo_e_nao_devolve_token(client, mailoutbox):
 def test_codigo_salvo_como_hash(client, mailoutbox):
     cadastrar(client)
     verification = EmailVerification.objects.get()
-    assert verification.code != codigo_do_email(mailoutbox)
+    assert verification.code_hash != codigo_do_email(mailoutbox)
 
 @pytest.mark.django_db
 def test_verificar_ativa_conta_e_manda_boas_vindas(client, mailoutbox):

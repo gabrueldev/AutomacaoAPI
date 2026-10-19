@@ -6,8 +6,7 @@ from datetime import timedelta
 
 class EmailVerification(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    # Guardado como hash sha256, nunca o código em texto puro
-    code = models.CharField(max_length=64)
+    code_hash = models.CharField(max_length=64)
     created_at = models.DateTimeField(default=timezone.now)
     attempts = models.PositiveSmallIntegerField(default=0)
     is_verified = models.BooleanField(default=False)

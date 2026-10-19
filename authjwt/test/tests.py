@@ -1,4 +1,3 @@
-
 from django.test import TestCase
 import pytest
 from rest_framework.exceptions import ValidationError
@@ -45,7 +44,7 @@ def teste_verify_email():
 
     verification = EmailVerification.objects.create(
         user=user,
-        code=hash_code('123456'),
+        code_hash=hash_code('123456'),
         is_verified=False
     )
 
@@ -78,7 +77,7 @@ def test_verify_email_wrong_code():
 
     EmailVerification.objects.create(
         user=user,
-        code=hash_code("123456"),
+        code_hash=hash_code("123456"),
         is_verified=False
     )
 
