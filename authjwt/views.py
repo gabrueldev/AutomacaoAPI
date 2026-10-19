@@ -1,18 +1,18 @@
 
-from django.contrib.auth.models import User
-from .serializers import CadasterSerializer, LoginSerializer, VerifyEmailSerializer
+from .serializers import CadasterSerializer, LoginSerializer, VerifyEmailSerializer, ResendCodeSerializer, UserSerializer
+from .services import send_new_code
 from rest_framework.views import APIView
-from rest_framework.generics import UpdateAPIView, DestroyAPIView
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from django.contrib.auth import get_user_model
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 
 User = get_user_model()
 
 class VerifyEmailView(APIView):
+    permission_classes = [AllowAny]
 
     def post(self, request):
         serializer = VerifyEmailSerializer(data=request.data)
@@ -20,32 +20,40 @@ class VerifyEmailView(APIView):
 
         return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
+class ResendCodeView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = ResendCodeSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        user = User.objects.filter(email__iexact=serializer.validated_data["email"], is_active=False).first()
+        if user:
+            send_new_code(user)
+
+        # Mesma resposta sempre, para não revelar quais emails estão cadastrados
+        return Response({"detail": "Se o email estiver pendente, um novo código foi enviado."})
+
 class CadasterView(APIView):
+    permission_classes = [AllowAny]
+
     def post(self, request):
         serializer = CadasterSerializer(data=request.data)
-        
-        if serializer.is_valid():
-            user    = serializer.save()
-            refresh = RefreshToken.for_user(user)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
 
-            return Response({
-                "refresh": str(refresh),
-                "access": str(refresh.access_token),
-            }, status=status.HTTP_201_CREATED)
-        
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(
+            {"detail": "Conta criada. Enviamos um código para o seu email."},
+            status=status.HTTP_201_CREATED
+        )
     
 class LoginView(TokenObtainPairView):
     serializer_class = LoginSerializer
 
-class DeleteView(DestroyAPIView):
-    queryset           = User.objects.all()
-    serializer_class   = CadasterSerializer
-    lookup_field       = 'id'
+# A conta é sempre a do usuário logado, então ninguém mexe na conta de outro
+class MeView(RetrieveUpdateDestroyAPIView):
+    serializer_class   = UserSerializer
     permission_classes = [IsAuthenticated]
 
-class EditView(UpdateAPIView):
-    queryset           = User.objects.all()
-    serializer_class   = CadasterSerializer
-    lookup_field       = 'id'
-    permission_classes = [IsAuthenticated]
+    def get_object(self):
+        return self.request.user
