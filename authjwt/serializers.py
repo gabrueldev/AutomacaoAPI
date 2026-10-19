@@ -1,4 +1,3 @@
-
 from rest_framework import serializers
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -63,7 +62,7 @@ class VerifyEmailSerializer(serializers.Serializer):
             raise serializers.ValidationError("Código expirado, peça um novo")
         if verification.attempts >= settings.VERIFICATION_MAX_ATTEMPTS:
             raise serializers.ValidationError("Muitas tentativas, peça um novo código")
-        if not constant_time_compare(verification.code, hash_code(attrs["code"])):
+        if not constant_time_compare(verification.code_hash, hash_code(attrs["code"])):
             verification.attempts += 1
             verification.save(update_fields=["attempts"])
             raise serializers.ValidationError("Código incorreto")

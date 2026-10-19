@@ -1,4 +1,3 @@
-
 import hashlib
 import secrets
 from django.contrib.auth import get_user_model
@@ -20,7 +19,7 @@ def send_new_code(user):
     EmailVerification.objects.update_or_create(
         user     = user,
         defaults = {
-            "code": hash_code(code),
+            "code_hash": hash_code(code),
             "created_at": timezone.now(),
             "attempts": 0,
             "is_verified": False,

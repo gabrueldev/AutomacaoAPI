@@ -60,6 +60,18 @@ Nas rotas protegidas, mande o token no header: `Authorization: Bearer <access>`.
 
 Isso sobe a API, o Postgres, o Redis e o worker do Celery. A API fica em **http://localhost:8000/api/**.
 
+### Variáveis do `.env`
+
+| Variável | Para que serve |
+|---|---|
+| `SECRET_KEY` | Chave do Django. Use um texto grande e aleatório |
+| `DEBUG` | `True` só em desenvolvimento |
+| `DATABASE_URL` | Banco usado fora do Docker. No Docker, o `docker-compose.yml` já aponta para o Postgres |
+| `CELERY_URL` | Redis usado fora do Docker. No Docker, já aponta para o serviço `redis` |
+| `EMAIL_HOST_USER` | Seu Gmail. **Vazio = os emails aparecem no log em vez de serem enviados** |
+| `EMAIL_HOST_PASSWORD` | Senha de app do Gmail (myaccount.google.com/apppasswords), não a senha da conta |
+| `DEFAULT_FROM_EMAIL` | Remetente que aparece para o usuário |
+
 > Para enviar pelo Gmail, use uma **senha de app** (myaccount.google.com/apppasswords). Se deixar `EMAIL_HOST_USER` vazio, os emails aparecem no log do worker em vez de serem enviados, o que é útil para testar.
 
 ## Testes
